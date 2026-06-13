@@ -2,38 +2,48 @@ package cuvet.model;
 
 import java.time.LocalDate;
 
-public class Vacuna extends Servicio {
-    private String fabricante;
+/**
+ * Registro de vacunación por mascota.
+ * @author Becerra Huillcas, Gianella Emely (2411438)
+ */
+public class Vacuna {
+    private int id;
+    private int idMascota;
+    private String nombreVacuna;
     private String lote;
-    private LocalDate fechaVencimiento;
-    private int mesesProteccion;
-    private String enfermadadesCubre;
+    private LocalDate fechaAplicacion;
+    private LocalDate fechaProxima;
+    private int idVeterinario;
 
-    public Vacuna() { super(); }
+    public Vacuna() {}
 
-    public Vacuna(String descripcion, double precioBase, String fabricante, String lote, int mesesProteccion) {
-        super(descripcion, TipoServicio.vacuna(), precioBase);
-        this.fabricante = fabricante;
+    public Vacuna(int idMascota, String nombreVacuna, String lote,
+                  LocalDate fechaAplicacion, LocalDate fechaProxima, int idVeterinario) {
+        this.idMascota = idMascota;
+        this.nombreVacuna = nombreVacuna;
         this.lote = lote;
-        this.mesesProteccion = mesesProteccion;
-    }
-
-    public LocalDate calcularProximaAplicacion(LocalDate fechaAplicacion) {
-        return fechaAplicacion.plusMonths(mesesProteccion);
+        this.fechaAplicacion = fechaAplicacion;
+        this.fechaProxima = fechaProxima;
+        this.idVeterinario = idVeterinario;
     }
 
     public boolean estaVencida() {
-        return fechaVencimiento != null && LocalDate.now().isAfter(fechaVencimiento);
+        return fechaProxima != null && LocalDate.now().isAfter(fechaProxima);
     }
 
-    public String getFabricante() { return fabricante; }
-    public void setFabricante(String f) { this.fabricante = f; }
+    // Getters y Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public int getIdMascota() { return idMascota; }
+    public void setIdMascota(int idMascota) { this.idMascota = idMascota; }
+    public String getNombreVacuna() { return nombreVacuna; }
+    public void setNombreVacuna(String nombreVacuna) { this.nombreVacuna = nombreVacuna; }
     public String getLote() { return lote; }
     public void setLote(String lote) { this.lote = lote; }
-    public LocalDate getFechaVencimiento() { return fechaVencimiento; }
-    public void setFechaVencimiento(LocalDate f) { this.fechaVencimiento = f; }
-    public int getMesesProteccion() { return mesesProteccion; }
-    public void setMesesProteccion(int m) { this.mesesProteccion = m; }
-    public String getEnfermadadesCubre() { return enfermadadesCubre; }
-    public void setEnfermadadesCubre(String e) { this.enfermadadesCubre = e; }
+    public LocalDate getFechaAplicacion() { return fechaAplicacion; }
+    public void setFechaAplicacion(LocalDate fechaAplicacion) { this.fechaAplicacion = fechaAplicacion; }
+    public LocalDate getFechaProxima() { return fechaProxima; }
+    public void setFechaProxima(LocalDate fechaProxima) { this.fechaProxima = fechaProxima; }
+    public int getIdVeterinario() { return idVeterinario; }
+    public void setIdVeterinario(int idVeterinario) { this.idVeterinario = idVeterinario; }
 }

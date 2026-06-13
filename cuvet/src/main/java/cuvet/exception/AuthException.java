@@ -1,6 +1,6 @@
 package cuvet.exception;
-
-public class AuthException extends Exception {
-    public AuthException(String mensaje) { super(mensaje); }
-    public AuthException(String mensaje, Throwable causa) { super(mensaje, causa); }
+/** Lanzada por credenciales inválidas o permisos insuficientes. @author Becerra Huillcas, Gianella Emely (2411438) */
+public class AuthException extends RuntimeException {
+    public AuthException(String message) { super(message); }
+    public AuthException(String message, Throwable cause) { super(message, cause); }
 }

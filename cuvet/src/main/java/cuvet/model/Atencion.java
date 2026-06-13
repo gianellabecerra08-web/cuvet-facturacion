@@ -1,58 +1,51 @@
 package cuvet.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Atencion implements Auditable {
+/**
+ * Entidad Atencion médica. Núcleo del flujo principal del sistema.
+ * @author Becerra Huillcas, Gianella Emely (2411438)
+ */
+public class Atencion {
     private int id;
+    private LocalDate fecha;
     private int idCliente;
     private int idMascota;
     private int idVeterinario;
-    private LocalDateTime fechaAtencion;
-    private EstadoAtencion estado;
     private String observaciones;
     private List<Servicio> servicios;
-    private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaModificacion;
-    private String usuarioCreacion;
 
     public Atencion() {
+        this.fecha = LocalDate.now();
         this.servicios = new ArrayList<>();
-        this.estado = EstadoAtencion.REGISTRADA;
-        this.fechaAtencion = LocalDateTime.now();
     }
 
-    public void agregarServicio(Servicio servicio) {
-        if (servicio != null && !servicios.contains(servicio)) servicios.add(servicio);
+    public Atencion(int idCliente, int idMascota, int idVeterinario, String observaciones) {
+        this.fecha = LocalDate.now();
+        this.idCliente = idCliente;
+        this.idMascota = idMascota;
+        this.idVeterinario = idVeterinario;
+        this.observaciones = observaciones;
+        this.servicios = new ArrayList<>();
     }
 
-    public void removerServicio(Servicio servicio) { servicios.remove(servicio); }
+    public void agregarServicio(Servicio s) { servicios.add(s); }
 
-    public double calcularMontoTotal() {
-        return servicios.stream().mapToDouble(Servicio::getPrecioBase).sum();
-    }
-
-    @Override public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-    @Override public LocalDateTime getFechaModificacion() { return fechaModificacion; }
-    @Override public String getUsuarioCreacion() { return usuarioCreacion; }
-    @Override public void setFechaCreacion(LocalDateTime f) { this.fechaCreacion = f; }
-    @Override public void setFechaModificacion(LocalDateTime f) { this.fechaModificacion = f; }
-    @Override public void setUsuarioCreacion(String u) { this.usuarioCreacion = u; }
-
+    // Getters y Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+    public LocalDate getFecha() { return fecha; }
+    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
     public int getIdCliente() { return idCliente; }
-    public void setIdCliente(int id) { this.idCliente = id; }
+    public void setIdCliente(int idCliente) { this.idCliente = idCliente; }
     public int getIdMascota() { return idMascota; }
-    public void setIdMascota(int id) { this.idMascota = id; }
+    public void setIdMascota(int idMascota) { this.idMascota = idMascota; }
     public int getIdVeterinario() { return idVeterinario; }
-    public void setIdVeterinario(int id) { this.idVeterinario = id; }
-    public LocalDateTime getFechaAtencion() { return fechaAtencion; }
-    public void setFechaAtencion(LocalDateTime f) { this.fechaAtencion = f; }
-    public EstadoAtencion getEstado() { return estado; }
-    public void setEstado(EstadoAtencion estado) { this.estado = estado; }
+    public void setIdVeterinario(int idVeterinario) { this.idVeterinario = idVeterinario; }
     public String getObservaciones() { return observaciones; }
-    public void setObservaciones(String o) { this.observaciones = o; }
+    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
     public List<Servicio> getServicios() { return servicios; }
+    public void setServicios(List<Servicio> servicios) { this.servicios = servicios; }
 }

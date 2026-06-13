@@ -1,6 +1,6 @@
 package cuvet.exception;
-
-public class StockInsuficienteException extends Exception {
-    public StockInsuficienteException(String mensaje) { super(mensaje); }
-    public StockInsuficienteException(String mensaje, Throwable causa) { super(mensaje, causa); }
+/** Lanzada cuando el stock no cubre la cantidad. @author Becerra Huillcas, Gianella Emely (2411438) */
+public class StockInsuficienteException extends RuntimeException {
+    public StockInsuficienteException(String message) { super(message); }
+    public StockInsuficienteException(String message, Throwable cause) { super(message, cause); }
 }

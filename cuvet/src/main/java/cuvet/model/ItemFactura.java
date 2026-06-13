@@ -1,38 +1,39 @@
 package cuvet.model;
 
-public class ItemFactura implements Calculable {
+import java.math.BigDecimal;
+
+/**
+ * Línea individual de una factura.
+ * @author Becerra Huillcas, Gianella Emely (2411438)
+ */
+public class ItemFactura {
     private int id;
     private int idFactura;
-    private String descripcion;
+    private Servicio servicio;
     private int cantidad;
-    private double precioUnitario;
-    private TipoServicio tipoServicio;
+    private BigDecimal precioUnitario;
 
     public ItemFactura() {}
 
-    public ItemFactura(String descripcion, int cantidad, double precioUnitario, TipoServicio tipoServicio) {
-        this.descripcion = descripcion;
+    public ItemFactura(Servicio servicio, int cantidad) {
+        this.servicio = servicio;
         this.cantidad = cantidad;
-        this.precioUnitario = precioUnitario;
-        this.tipoServicio = tipoServicio;
+        this.precioUnitario = servicio.getPrecio();
     }
 
-    public double getSubtotal() { return cantidad * precioUnitario; }
+    public BigDecimal getSubtotal() {
+        return precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+    }
 
-    @Override public double calcularSubtotal() { return getSubtotal(); }
-    @Override public double calcularIGV() { return getSubtotal() * 0.18; }
-    @Override public double calcularTotal() { return getSubtotal() + calcularIGV(); }
-
+    // Getters y Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public int getIdFactura() { return idFactura; }
-    public void setIdFactura(int id) { this.idFactura = id; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String d) { this.descripcion = d; }
+    public void setIdFactura(int idFactura) { this.idFactura = idFactura; }
+    public Servicio getServicio() { return servicio; }
+    public void setServicio(Servicio servicio) { this.servicio = servicio; }
     public int getCantidad() { return cantidad; }
     public void setCantidad(int cantidad) { this.cantidad = cantidad; }
-    public double getPrecioUnitario() { return precioUnitario; }
-    public void setPrecioUnitario(double p) { this.precioUnitario = p; }
-    public TipoServicio getTipoServicio() { return tipoServicio; }
-    public void setTipoServicio(TipoServicio t) { this.tipoServicio = t; }
+    public BigDecimal getPrecioUnitario() { return precioUnitario; }
+    public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
 }

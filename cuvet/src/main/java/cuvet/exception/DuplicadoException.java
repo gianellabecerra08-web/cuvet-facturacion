@@ -1,6 +1,6 @@
 package cuvet.exception;
-
-public class DuplicadoException extends Exception {
-    public DuplicadoException(String mensaje) { super(mensaje); }
-    public DuplicadoException(String mensaje, Throwable causa) { super(mensaje, causa); }
+/** Lanzada al detectar servicio duplicado para la misma mascota y fecha. @author Becerra Huillcas, Gianella Emely (2411438) */
+public class DuplicadoException extends RuntimeException {
+    public DuplicadoException(String message) { super(message); }
+    public DuplicadoException(String message, Throwable cause) { super(message, cause); }
 }

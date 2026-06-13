@@ -1,34 +1,28 @@
 package cuvet.model;
 
-public class TipoServicio {
-    private int id;
-    private String codigo;
-    private String nombre;
-    private String descripcion;
-    private boolean activo;
+/**
+ * Enumerado de tipos de servicio ofrecidos en CUVET.
+ * @author Becerra Huillcas, Gianella Emely (2411438)
+ */
+public enum TipoServicio {
+    CONSULTA("Consulta Médica", 50.00),
+    CIRUGIA("Cirugía", 200.00),
+    VACUNA("Vacunación", 30.00),
+    MEDICAMENTO("Medicamento", 0.00),
+    HOSPITALIZACION("Hospitalización", 80.00),
+    LABORATORIO("Laboratorio/Análisis", 60.00);
 
-    public TipoServicio() { this.activo = true; }
+    private final String descripcion;
+    private final double precioBase;
 
-    public TipoServicio(String codigo, String nombre) {
-        this();
-        this.codigo = codigo;
-        this.nombre = nombre;
+    TipoServicio(String descripcion, double precioBase) {
+        this.descripcion = descripcion;
+        this.precioBase = precioBase;
     }
 
-    public static TipoServicio consulta() { return new TipoServicio("CONSULTA", "Consulta médica"); }
-    public static TipoServicio cirugia() { return new TipoServicio("CIRUGIA", "Cirugía"); }
-    public static TipoServicio vacuna() { return new TipoServicio("VACUNA", "Vacunación"); }
-    public static TipoServicio medicamento() { return new TipoServicio("MEDICAMENTO", "Medicamento"); }
-    public static TipoServicio hospitalizacion() { return new TipoServicio("HOSPITALIZACION", "Hospitalización"); }
-
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public String getCodigo() { return codigo; }
-    public void setCodigo(String codigo) { this.codigo = codigo; }
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
     public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String d) { this.descripcion = d; }
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
+    public double getPrecioBase() { return precioBase; }
+
+    @Override
+    public String toString() { return descripcion; }
 }

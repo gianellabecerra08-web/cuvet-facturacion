@@ -1,52 +1,40 @@
 package cuvet.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
 
-public class Servicio implements Validable {
+/**
+ * Entidad Servicio (ítem del catálogo facturable).
+ * @author Becerra Huillcas, Gianella Emely (2411438)
+ */
+public class Servicio {
     private int id;
-    private String descripcion;
     private TipoServicio tipo;
-    private double precioBase;
+    private String descripcion;
+    private BigDecimal precio;
     private boolean activo;
 
     public Servicio() { this.activo = true; }
 
-    public Servicio(String descripcion, TipoServicio tipo, double precioBase) {
-        this();
-        this.descripcion = descripcion;
+    public Servicio(int id, TipoServicio tipo, String descripcion, BigDecimal precio) {
+        this.id = id;
         this.tipo = tipo;
-        this.precioBase = precioBase;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.activo = true;
     }
 
-    @Override
-    public boolean esValido() {
-        return descripcion != null && !descripcion.isEmpty() && tipo != null && precioBase >= 0;
-    }
-
-    @Override
-    public List<String> obtenerErrores() {
-        List<String> errores = new ArrayList<>();
-        if (descripcion == null || descripcion.isEmpty()) errores.add("La descripción es obligatoria.");
-        if (tipo == null) errores.add("El tipo de servicio es obligatorio.");
-        if (precioBase < 0) errores.add("El precio no puede ser negativo.");
-        return errores;
-    }
-
-    @Override
-    public void validar() throws Exception {
-        List<String> errores = obtenerErrores();
-        if (!errores.isEmpty()) throw new Exception(String.join(", ", errores));
-    }
-
+    // Getters y Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String d) { this.descripcion = d; }
     public TipoServicio getTipo() { return tipo; }
     public void setTipo(TipoServicio tipo) { this.tipo = tipo; }
-    public double getPrecioBase() { return precioBase; }
-    public void setPrecioBase(double p) { this.precioBase = p; }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public BigDecimal getPrecio() { return precio; }
+    public void setPrecio(BigDecimal precio) { this.precio = precio; }
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
+
+    @Override
+    public String toString() { return "[" + tipo.name() + "] " + descripcion + " - S/ " + precio; }
 }

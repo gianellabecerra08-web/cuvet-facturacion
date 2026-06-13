@@ -1,59 +1,47 @@
 package cuvet.model;
 
-import java.time.LocalDateTime;
-
-public class Usuario implements Auditable {
+/**
+ * Entidad Usuario del sistema con control de acceso por roles.
+ * @author Becerra Huillcas, Gianella Emely (2411438)
+ */
+public class Usuario {
     private int id;
     private String username;
-    private String passwordHash;
+    private String passwordHash; // SHA-256 + salt
     private String nombre;
-    private String apellido;
     private Rol rol;
     private boolean activo;
-    private LocalDateTime ultimoAcceso;
-    private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaModificacion;
-    private String usuarioCreacion;
 
     public Usuario() { this.activo = true; }
 
-    public Usuario(String username, String passwordHash, String nombre, String apellido, Rol rol) {
-        this();
+    public Usuario(int id, String username, String passwordHash, String nombre, Rol rol) {
+        this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
         this.nombre = nombre;
-        this.apellido = apellido;
         this.rol = rol;
+        this.activo = true;
     }
 
-    public String getNombreCompleto() { return nombre + " " + apellido; }
-
-    public boolean tienePermiso(String permiso) {
-        if (rol == null || rol.getPermisos() == null) return false;
-        return rol.getPermisos().stream().anyMatch(p -> p.getCodigo().equals(permiso));
+    public boolean tienePermiso(Rol rolRequerido) {
+        if (this.rol == Rol.ADMINISTRADOR) return true;
+        return this.rol == rolRequerido;
     }
 
-    @Override public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-    @Override public LocalDateTime getFechaModificacion() { return fechaModificacion; }
-    @Override public String getUsuarioCreacion() { return usuarioCreacion; }
-    @Override public void setFechaCreacion(LocalDateTime f) { this.fechaCreacion = f; }
-    @Override public void setFechaModificacion(LocalDateTime f) { this.fechaModificacion = f; }
-    @Override public void setUsuarioCreacion(String u) { this.usuarioCreacion = u; }
-
+    // Getters y Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getUsername() { return username; }
-    public void setUsername(String u) { this.username = u; }
+    public void setUsername(String username) { this.username = username; }
     public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String p) { this.passwordHash = p; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
-    public String getApellido() { return apellido; }
-    public void setApellido(String apellido) { this.apellido = apellido; }
     public Rol getRol() { return rol; }
     public void setRol(Rol rol) { this.rol = rol; }
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
-    public LocalDateTime getUltimoAcceso() { return ultimoAcceso; }
-    public void setUltimoAcceso(LocalDateTime u) { this.ultimoAcceso = u; }
+
+    @Override
+    public String toString() { return nombre + " [" + rol + "]"; }
 }

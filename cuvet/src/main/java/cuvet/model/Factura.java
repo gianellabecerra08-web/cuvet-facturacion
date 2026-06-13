@@ -1,69 +1,68 @@
 package cuvet.model;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Factura implements Calculable, Auditable, Exportable {
-    private static final double IGV = 0.18;
+/**
+ * Entidad Factura. Calcula subtotal + IGV 18% con BigDecimal.
+ * @author Becerra Huillcas, Gianella Emely (2411438)
+ */
+public class Factura {
+    private static final BigDecimal TASA_IGV = new BigDecimal("0.18");
+
     private int id;
     private int idAtencion;
-    private int idCliente;
-    private String serie;
-    private int numero;
-    private LocalDateTime fechaEmision;
-    private EstadoFactura estado;
+    private String numero; // e.g. "F001-00001"
+    private LocalDate fecha;
     private List<ItemFactura> items;
-    private MetodoPago metodoPago;
-    private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaModificacion;
-    private String usuarioCreacion;
+    private String estado; // "EMITIDA", "ANULADA"
 
     public Factura() {
+        this.fecha = LocalDate.now();
         this.items = new ArrayList<>();
-        this.estado = EstadoFactura.PENDIENTE;
-        this.fechaEmision = LocalDateTime.now();
+        this.estado = "EMITIDA";
     }
 
-    public void agregarItem(ItemFactura item) { if (item != null) items.add(item); }
-
-    @Override public double calcularSubtotal() {
-        return items.stream().mapToDouble(ItemFactura::getSubtotal).sum();
+    public Factura(int idAtencion) {
+        this();
+        this.idAtencion = idAtencion;
     }
-    @Override public double calcularIGV() { return calcularSubtotal() * IGV; }
-    @Override public double calcularTotal() { return calcularSubtotal() + calcularIGV(); }
-    @Override public byte[] exportarPDF() { return new byte[0]; }
-    @Override public String exportarCSV() {
-        StringBuilder sb = new StringBuilder("Descripcion,Cantidad,PrecioUnit,Subtotal\n");
-        for (ItemFactura item : items)
-            sb.append(item.getDescripcion()).append(",").append(item.getCantidad()).append(",")
-                    .append(item.getPrecioUnitario()).append(",").append(item.getSubtotal()).append("\n");
-        return sb.toString();
+
+    public BigDecimal getSubtotal() {
+        return items.stream()
+                .map(ItemFactura::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-    @Override public String getNombreArchivo() { return "Factura_" + serie + "-" + numero + ".pdf"; }
 
-    @Override public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-    @Override public LocalDateTime getFechaModificacion() { return fechaModificacion; }
-    @Override public String getUsuarioCreacion() { return usuarioCreacion; }
-    @Override public void setFechaCreacion(LocalDateTime f) { this.fechaCreacion = f; }
-    @Override public void setFechaModificacion(LocalDateTime f) { this.fechaModificacion = f; }
-    @Override public void setUsuarioCreacion(String u) { this.usuarioCreacion = u; }
+    public BigDecimal getIgv() {
+        return getSubtotal().multiply(TASA_IGV).setScale(2, RoundingMode.HALF_UP);
+    }
 
+    public BigDecimal getTotal() {
+        return getSubtotal().add(getIgv()).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public void agregarItem(ItemFactura item) { items.add(item); }
+
+    // Getters y Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public int getIdAtencion() { return idAtencion; }
-    public void setIdAtencion(int id) { this.idAtencion = id; }
-    public int getIdCliente() { return idCliente; }
-    public void setIdCliente(int id) { this.idCliente = id; }
-    public String getSerie() { return serie; }
-    public void setSerie(String serie) { this.serie = serie; }
-    public int getNumero() { return numero; }
-    public void setNumero(int numero) { this.numero = numero; }
-    public LocalDateTime getFechaEmision() { return fechaEmision; }
-    public void setFechaEmision(LocalDateTime f) { this.fechaEmision = f; }
-    public EstadoFactura getEstado() { return estado; }
-    public void setEstado(EstadoFactura estado) { this.estado = estado; }
+    public void setIdAtencion(int idAtencion) { this.idAtencion = idAtencion; }
+    public String getNumero() { return numero; }
+    public void setNumero(String numero) { this.numero = numero; }
+    public LocalDate getFecha() { return fecha; }
+    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
     public List<ItemFactura> getItems() { return items; }
-    public MetodoPago getMetodoPago() { return metodoPago; }
-    public void setMetodoPago(MetodoPago m) { this.metodoPago = m; }
+    public void setItems(List<ItemFactura> items) { this.items = items; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+
+    @Override
+    public String toString() {
+        return "Factura N° " + numero + " | Total: S/ " + getTotal();
+    }
 }
