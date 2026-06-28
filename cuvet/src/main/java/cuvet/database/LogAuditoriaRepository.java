@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +20,6 @@ import java.util.Optional;
 
 public class LogAuditoriaRepository implements IRepository<LogAuditoria, Integer> {
     private final Connection conn = DatabaseConnection.getInstancia().getConnection();
-
     @Override
     public LogAuditoria guardar(LogAuditoria log) {
         String sql = "INSERT INTO log_auditoria (id_usuario, accion, tabla, id_registro, timestamp, detalle) VALUES (?,?,?,?,?,?)";
@@ -43,7 +41,6 @@ public class LogAuditoriaRepository implements IRepository<LogAuditoria, Integer
             throw new DatabaseException("Error al guardar log", e);
         }
     }
-
     @Override
     public Optional<LogAuditoria> buscarPorId(Integer id) {
         String sql = "SELECT * FROM log_auditoria WHERE id = ?";
@@ -59,7 +56,6 @@ public class LogAuditoriaRepository implements IRepository<LogAuditoria, Integer
         }
         return Optional.empty();
     }
-
     @Override
     public List<LogAuditoria> listarTodos() {
         List<LogAuditoria> lista = new ArrayList<>();
@@ -74,17 +70,14 @@ public class LogAuditoriaRepository implements IRepository<LogAuditoria, Integer
         }
         return lista;
     }
-
     @Override
     public void actualizar(LogAuditoria e) {
         throw new UnsupportedOperationException("Log es inmutable");
     }
-
     @Override
     public void eliminar(Integer id) {
         throw new UnsupportedOperationException("Log es inmutable");
     }
-
     public List<LogAuditoria> listarPorUsuario(int idUsuario) {
         List<LogAuditoria> lista = new ArrayList<>();
         String sql = "SELECT * FROM log_auditoria WHERE id_usuario = ? ORDER BY timestamp DESC";
@@ -100,7 +93,6 @@ public class LogAuditoriaRepository implements IRepository<LogAuditoria, Integer
         }
         return lista;
     }
-
     public List<LogAuditoria> listarPorTabla(String tabla) {
         List<LogAuditoria> lista = new ArrayList<>();
         String sql = "SELECT * FROM log_auditoria WHERE tabla = ? ORDER BY timestamp DESC";
@@ -116,7 +108,6 @@ public class LogAuditoriaRepository implements IRepository<LogAuditoria, Integer
         }
         return lista;
     }
-
     public List<LogAuditoria> listarPorFecha(LocalDate fecha) {
         List<LogAuditoria> lista = new ArrayList<>();
         String sql = "SELECT * FROM log_auditoria WHERE DATE(timestamp) = ? ORDER BY timestamp DESC";
@@ -132,7 +123,6 @@ public class LogAuditoriaRepository implements IRepository<LogAuditoria, Integer
         }
         return lista;
     }
-
     private LogAuditoria mapear(ResultSet rs) throws SQLException {
         LogAuditoria log = new LogAuditoria(
                 rs.getInt("id_usuario"),

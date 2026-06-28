@@ -10,6 +10,7 @@ import java.util.Optional;
  * @param <ID> Tipo del identificador
  * @author Cartagena Saco, Jose Alejandro (2310405)
  */
+
 public interface IRepository<T, ID> {
     T guardar(T entidad);
     Optional<T> buscarPorId(ID id);
