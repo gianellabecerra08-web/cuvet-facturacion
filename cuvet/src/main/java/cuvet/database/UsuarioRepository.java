@@ -3,7 +3,11 @@ package cuvet.database;
 import cuvet.exception.DatabaseException;
 import cuvet.model.Rol;
 import cuvet.model.Usuario;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,10 +16,9 @@ import java.util.Optional;
  * Repositorio de usuarios. Valida credenciales para autenticación.
  * @author Cartagena Saco, Jose Alejandro (2310405)
  */
+
 public class UsuarioRepository implements IRepository<Usuario, Integer> {
-
     private final Connection conn = DatabaseConnection.getInstancia().getConnection();
-
     @Override
     public Usuario guardar(Usuario u) {
         String sql = "INSERT INTO usuarios (username, password_hash, nombre, rol, activo) VALUES (?,?,?,?,?)";
@@ -27,41 +30,44 @@ public class UsuarioRepository implements IRepository<Usuario, Integer> {
             ps.setBoolean(5, u.isActivo());
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) u.setId(rs.getInt(1));
+                if (rs.next()) {
+                    u.setId(rs.getInt(1));
+                }
             }
             return u;
         } catch (SQLException e) {
             throw new DatabaseException("Error al guardar usuario", e);
         }
     }
-
     @Override
     public Optional<Usuario> buscarPorId(Integer id) {
         String sql = "SELECT * FROM usuarios WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return Optional.of(mapear(rs));
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
             }
         } catch (SQLException e) {
             throw new DatabaseException("Error al buscar usuario", e);
         }
         return Optional.empty();
     }
-
     @Override
     public List<Usuario> listarTodos() {
         List<Usuario> lista = new ArrayList<>();
-        String sql = "SELECT * FROM usuarios WHERE activo = true";
+        String sql = "SELECT * FROM usuarios WHERE activo = true ORDER BY nombre";
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) lista.add(mapear(rs));
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
         } catch (SQLException e) {
             throw new DatabaseException("Error al listar usuarios", e);
         }
         return lista;
     }
-
     @Override
     public void actualizar(Usuario u) {
         String sql = "UPDATE usuarios SET nombre=?, rol=?, activo=? WHERE id=?";
@@ -75,7 +81,6 @@ public class UsuarioRepository implements IRepository<Usuario, Integer> {
             throw new DatabaseException("Error al actualizar usuario", e);
         }
     }
-
     @Override
     public void eliminar(Integer id) {
         String sql = "UPDATE usuarios SET activo=false WHERE id=?";
@@ -86,38 +91,74 @@ public class UsuarioRepository implements IRepository<Usuario, Integer> {
             throw new DatabaseException("Error al desactivar usuario", e);
         }
     }
-
-    /**
-     * Autentica usuario por username y passwordHash (SHA-256+salt).
-     * @return Optional con el usuario si las credenciales son válidas
-     */
     public Optional<Usuario> autenticar(String username, String passwordHash) {
         String sql = "SELECT * FROM usuarios WHERE username=? AND password_hash=? AND activo=true";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             ps.setString(2, passwordHash);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return Optional.of(mapear(rs));
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
             }
         } catch (SQLException e) {
             throw new DatabaseException("Error en autenticación", e);
         }
         return Optional.empty();
     }
-
+    public Optional<Usuario> buscarPorUsername(String username) {
+        String sql = "SELECT * FROM usuarios WHERE username = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al buscar usuario por username", e);
+        }
+        return Optional.empty();
+    }
     public boolean existeUsername(String username) {
         String sql = "SELECT COUNT(*) FROM usuarios WHERE username = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
             }
         } catch (SQLException e) {
             throw new DatabaseException("Error al verificar username", e);
         }
         return false;
     }
-
+    public List<Usuario> listarPorRol(Rol rol) {
+        List<Usuario> lista = new ArrayList<>();
+        String sql = "SELECT * FROM usuarios WHERE rol = ? AND activo = true ORDER BY nombre";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, rol.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al listar usuarios por rol", e);
+        }
+        return lista;
+    }
+    public void actualizarPassword(int id, String nuevoHash) {
+        String sql = "UPDATE usuarios SET password_hash = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nuevoHash);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al actualizar contraseña", e);
+        }
+    }
     private Usuario mapear(ResultSet rs) throws SQLException {
         Usuario u = new Usuario(
                 rs.getInt("id"),
