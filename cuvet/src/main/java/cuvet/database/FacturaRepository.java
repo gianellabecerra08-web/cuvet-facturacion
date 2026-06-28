@@ -5,7 +5,12 @@ import cuvet.model.Factura;
 import cuvet.model.ItemFactura;
 import cuvet.model.Servicio;
 import cuvet.model.TipoServicio;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +19,9 @@ import java.util.Optional;
  * Repositorio de facturas e ítems. Provee listado por mes para reportes.
  * @author Cartagena Saco, Jose Alejandro (2310405)
  */
+
 public class FacturaRepository implements IRepository<Factura, Integer> {
-
     private final Connection conn = DatabaseConnection.getInstancia().getConnection();
-
     @Override
     public Factura guardar(Factura f) {
         String sql = "INSERT INTO facturas (id_atencion, numero, fecha, subtotal, igv, total, estado) VALUES (?,?,?,?,?,?,?)";
@@ -31,7 +35,9 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
             ps.setString(7, f.getEstado());
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) f.setId(rs.getInt(1));
+                if (rs.next()) {
+                    f.setId(rs.getInt(1));
+                }
             }
             guardarItems(f);
             return f;
@@ -39,7 +45,6 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
             throw new DatabaseException("Error al guardar factura", e);
         }
     }
-
     private void guardarItems(Factura f) throws SQLException {
         String sql = "INSERT INTO factura_items (id_factura, id_servicio, cantidad, precio_unitario, subtotal) VALUES (?,?,?,?,?)";
         for (ItemFactura item : f.getItems()) {
@@ -53,34 +58,63 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
             }
         }
     }
-
     @Override
     public Optional<Factura> buscarPorId(Integer id) {
         String sql = "SELECT * FROM facturas WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return Optional.of(mapear(rs));
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
             }
         } catch (SQLException e) {
             throw new DatabaseException("Error al buscar factura", e);
         }
         return Optional.empty();
     }
-
+    public Optional<Factura> buscarPorAtencion(int idAtencion) {
+        String sql = "SELECT * FROM facturas WHERE id_atencion = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idAtencion);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al buscar factura por atención", e);
+        }
+        return Optional.empty();
+    }
+    public Optional<Factura> buscarPorNumero(String numero) {
+        String sql = "SELECT * FROM facturas WHERE numero = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, numero);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al buscar factura por número", e);
+        }
+        return Optional.empty();
+    }
     @Override
     public List<Factura> listarTodos() {
         List<Factura> lista = new ArrayList<>();
-        String sql = "SELECT * FROM facturas ORDER BY fecha DESC";
+        String sql = "SELECT * FROM facturas ORDER BY fecha DESC, id DESC";
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) lista.add(mapear(rs));
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
         } catch (SQLException e) {
             throw new DatabaseException("Error al listar facturas", e);
         }
         return lista;
     }
-
     @Override
     public void actualizar(Factura f) {
         String sql = "UPDATE facturas SET estado=? WHERE id=?";
@@ -92,7 +126,6 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
             throw new DatabaseException("Error al actualizar factura", e);
         }
     }
-
     @Override
     public void eliminar(Integer id) {
         String sql = "UPDATE facturas SET estado='ANULADA' WHERE id=?";
@@ -103,24 +136,22 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
             throw new DatabaseException("Error al anular factura", e);
         }
     }
-
-    /** Listado por mes y año para reportes (RF06) */
     public List<Factura> listarPorMes(int mes, int anio) {
         List<Factura> lista = new ArrayList<>();
-        String sql = "SELECT * FROM facturas WHERE MONTH(fecha)=? AND YEAR(fecha)=? AND estado='EMITIDA'";
+        String sql = "SELECT * FROM facturas WHERE MONTH(fecha)=? AND YEAR(fecha)=? AND estado='EMITIDA' ORDER BY fecha";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, mes);
             ps.setInt(2, anio);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) lista.add(mapear(rs));
+                while (rs.next()) {
+                    lista.add(mapear(rs));
+                }
             }
         } catch (SQLException e) {
             throw new DatabaseException("Error al listar por mes", e);
         }
         return lista;
     }
-
-    /** Obtiene el siguiente número de factura */
     public String generarNumeroFactura() {
         String sql = "SELECT COUNT(*) FROM facturas";
         try (Statement st = conn.createStatement();
@@ -134,7 +165,20 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
         }
         return "F001-00001";
     }
-
+    public boolean existePorAtencion(int idAtencion) {
+        String sql = "SELECT COUNT(*) FROM facturas WHERE id_atencion = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idAtencion);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al verificar factura por atención", e);
+        }
+        return false;
+    }
     private Factura mapear(ResultSet rs) throws SQLException {
         Factura f = new Factura();
         f.setId(rs.getInt("id"));
@@ -145,7 +189,6 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
         f.setItems(cargarItems(f.getId()));
         return f;
     }
-
     private List<ItemFactura> cargarItems(int idFactura) {
         List<ItemFactura> items = new ArrayList<>();
         String sql = """
@@ -166,7 +209,6 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
                             rs.getBigDecimal("precio")
                     );
                     servicio.setActivo(rs.getBoolean("activo"));
-
                     ItemFactura item = new ItemFactura();
                     item.setId(rs.getInt("id"));
                     item.setIdFactura(rs.getInt("id_factura"));

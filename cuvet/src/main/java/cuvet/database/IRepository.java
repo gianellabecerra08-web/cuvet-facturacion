@@ -11,18 +11,15 @@ import java.util.Optional;
  * @author Cartagena Saco, Jose Alejandro (2310405)
  */
 public interface IRepository<T, ID> {
-    /** Persiste una nueva entidad. Retorna la entidad con el ID generado. */
     T guardar(T entidad);
-
-    /** Busca por ID. Retorna Optional vacío si no existe. */
     Optional<T> buscarPorId(ID id);
-
-    /** Retorna todos los registros activos. */
     List<T> listarTodos();
-
-    /** Actualiza los datos de la entidad. */
     void actualizar(T entidad);
-
-    /** Elimina (o desactiva) la entidad por ID. */
     void eliminar(ID id);
+    default boolean existePorId(ID id) {
+        return buscarPorId(id).isPresent();
+    }
+    default long contarTodos() {
+        return listarTodos().size();
+    }
 }
