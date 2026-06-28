@@ -1,5 +1,6 @@
 package cuvet;
 
+import cuvet.database.DatabaseSeeder;
 import cuvet.view.LoginView;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -22,6 +23,7 @@ public class Main {
         } catch (Exception ignored) {}
 
         SwingUtilities.invokeLater(() -> {
+            DatabaseSeeder.inicializar();
             LoginView loginView = new LoginView();
             loginView.setVisible(true);
         });

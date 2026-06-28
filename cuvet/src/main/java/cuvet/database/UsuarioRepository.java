@@ -105,13 +105,28 @@ public class UsuarioRepository implements IRepository<Usuario, Integer> {
         return Optional.empty();
     }
 
+    public boolean existeUsername(String username) {
+        String sql = "SELECT COUNT(*) FROM usuarios WHERE username = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al verificar username", e);
+        }
+        return false;
+    }
+
     private Usuario mapear(ResultSet rs) throws SQLException {
-        return new Usuario(
+        Usuario u = new Usuario(
                 rs.getInt("id"),
                 rs.getString("username"),
                 rs.getString("password_hash"),
                 rs.getString("nombre"),
                 Rol.valueOf(rs.getString("rol"))
         );
+        u.setActivo(rs.getBoolean("activo"));
+        return u;
     }
 }

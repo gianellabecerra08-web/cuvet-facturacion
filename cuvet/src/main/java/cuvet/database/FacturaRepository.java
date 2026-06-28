@@ -3,6 +3,8 @@ package cuvet.database;
 import cuvet.exception.DatabaseException;
 import cuvet.model.Factura;
 import cuvet.model.ItemFactura;
+import cuvet.model.Servicio;
+import cuvet.model.TipoServicio;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,6 +142,43 @@ public class FacturaRepository implements IRepository<Factura, Integer> {
         f.setNumero(rs.getString("numero"));
         f.setFecha(rs.getDate("fecha").toLocalDate());
         f.setEstado(rs.getString("estado"));
+        f.setItems(cargarItems(f.getId()));
         return f;
+    }
+
+    private List<ItemFactura> cargarItems(int idFactura) {
+        List<ItemFactura> items = new ArrayList<>();
+        String sql = """
+            SELECT fi.id, fi.id_factura, fi.cantidad, fi.precio_unitario, fi.subtotal,
+                   s.id AS sid, s.tipo, s.descripcion, s.precio, s.activo
+            FROM factura_items fi
+            JOIN servicios s ON s.id = fi.id_servicio
+            WHERE fi.id_factura = ?
+            """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idFactura);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Servicio servicio = new Servicio(
+                            rs.getInt("sid"),
+                            TipoServicio.valueOf(rs.getString("tipo")),
+                            rs.getString("descripcion"),
+                            rs.getBigDecimal("precio")
+                    );
+                    servicio.setActivo(rs.getBoolean("activo"));
+
+                    ItemFactura item = new ItemFactura();
+                    item.setId(rs.getInt("id"));
+                    item.setIdFactura(rs.getInt("id_factura"));
+                    item.setServicio(servicio);
+                    item.setCantidad(rs.getInt("cantidad"));
+                    item.setPrecioUnitario(rs.getBigDecimal("precio_unitario"));
+                    items.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al cargar ítems de factura", e);
+        }
+        return items;
     }
 }

@@ -3,28 +3,34 @@ package cuvet.database;
 import cuvet.exception.DatabaseException;
 import cuvet.model.Cita;
 import java.sql.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-/**
- * CRUD de citas con listado por fecha y actualización de estado.
- * @author Cartagena Saco, Jose Alejandro (2310405)
- */
 public class CitaRepository implements IRepository<Cita, Integer> {
     private final Connection conn = DatabaseConnection.getInstancia().getConnection();
-
     @Override
     public Cita guardar(Cita c) {
         String sql = "INSERT INTO citas (id_cliente, id_mascota, id_veterinario, fecha_hora, motivo, estado) VALUES (?,?,?,?,?,?)";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, c.getIdCliente()); ps.setInt(2, c.getIdMascota());
-            ps.setInt(3, c.getIdVeterinario()); ps.setTimestamp(4, Timestamp.valueOf(c.getFechaHora()));
-            ps.setString(5, c.getMotivo()); ps.setString(6, c.getEstado().name());
+            ps.setInt(1, c.getIdCliente());
+            ps.setInt(2, c.getIdMascota());
+            ps.setInt(3, c.getIdVeterinario());
+            ps.setTimestamp(4, Timestamp.valueOf(c.getFechaHora()));
+            ps.setString(5, c.getMotivo());
+            ps.setString(6, c.getEstado().name());
             ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) { if (rs.next()) c.setId(rs.getInt(1)); }
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    c.setId(rs.getInt(1));
+                }
+            }
             return c;
-        } catch (SQLException e) { throw new DatabaseException("Error al guardar cita", e); }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al guardar cita", e);
+        }
     }
-
     @Override
     public Optional<Cita> buscarPorId(Integer id) {
         String sql = "SELECT * FROM citas WHERE id = ?";
@@ -32,7 +38,7 @@ public class CitaRepository implements IRepository<Cita, Integer> {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapearCita(rs)); // Asegúrate de tener un método mapearCita similar al de Atenciones
+                    return Optional.of(mapear(rs));
                 }
             }
         } catch (SQLException e) {
@@ -40,7 +46,6 @@ public class CitaRepository implements IRepository<Cita, Integer> {
         }
         return Optional.empty();
     }
-
     @Override
     public List<Cita> listarTodos() {
         List<Cita> lista = new ArrayList<>();
@@ -48,14 +53,13 @@ public class CitaRepository implements IRepository<Cita, Integer> {
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                lista.add(mapearCita(rs));
+                lista.add(mapear(rs));
             }
         } catch (SQLException e) {
             throw new DatabaseException("Error al listar todas las citas", e);
         }
         return lista;
     }
-
     @Override
     public void actualizar(Cita c) {
         String sql = "UPDATE citas SET id_cliente=?, id_mascota=?, id_veterinario=?, fecha_hora=?, motivo=?, estado=? WHERE id=?";
@@ -72,7 +76,6 @@ public class CitaRepository implements IRepository<Cita, Integer> {
             throw new DatabaseException("Error al actualizar la cita", e);
         }
     }
-
     @Override
     public void eliminar(Integer id) {
         String sql = "DELETE FROM citas WHERE id = ?";
@@ -83,28 +86,40 @@ public class CitaRepository implements IRepository<Cita, Integer> {
             throw new DatabaseException("Error al eliminar la cita de la base de datos", e);
         }
     }
-
     public void actualizarEstado(int id, Cita.EstadoCita estado) {
-        try (PreparedStatement ps = conn.prepareStatement("UPDATE citas SET estado=? WHERE id=?")) {
-            ps.setString(1, estado.name()); ps.setInt(2, id); ps.executeUpdate();
-        } catch (SQLException e) { throw new DatabaseException("Error al actualizar estado de cita", e); }
+        String sql = "UPDATE citas SET estado=? WHERE id=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, estado.name());
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al actualizar estado de cita", e);
+        }
     }
-
-    public List<Cita> listarPorFecha(java.time.LocalDate fecha) {
+    public List<Cita> listarPorFecha(LocalDate fecha) {
         List<Cita> lista = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM citas WHERE DATE(fecha_hora)=? ORDER BY fecha_hora")) {
+        String sql = "SELECT * FROM citas WHERE DATE(fecha_hora)=? ORDER BY fecha_hora";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDate(1, Date.valueOf(fecha));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Cita c = new Cita();
-                    c.setId(rs.getInt("id")); c.setIdCliente(rs.getInt("id_cliente"));
-                    c.setIdMascota(rs.getInt("id_mascota")); c.setIdVeterinario(rs.getInt("id_veterinario"));
-                    c.setFechaHora(rs.getTimestamp("fecha_hora").toLocalDateTime());
-                    c.setMotivo(rs.getString("motivo")); c.setEstado(Cita.EstadoCita.valueOf(rs.getString("estado")));
-                    lista.add(c);
+                    lista.add(mapear(rs));
                 }
             }
-        } catch (SQLException e) { throw new DatabaseException("Error al listar citas por fecha", e); }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al listar citas por fecha", e);
+        }
         return lista;
+    }
+    private Cita mapear(ResultSet rs) throws SQLException {
+        Cita c = new Cita();
+        c.setId(rs.getInt("id"));
+        c.setIdCliente(rs.getInt("id_cliente"));
+        c.setIdMascota(rs.getInt("id_mascota"));
+        c.setIdVeterinario(rs.getInt("id_veterinario"));
+        c.setFechaHora(rs.getTimestamp("fecha_hora").toLocalDateTime());
+        c.setMotivo(rs.getString("motivo"));
+        c.setEstado(Cita.EstadoCita.valueOf(rs.getString("estado")));
+        return c;
     }
 }

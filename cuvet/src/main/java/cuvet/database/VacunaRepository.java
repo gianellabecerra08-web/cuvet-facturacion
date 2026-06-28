@@ -40,7 +40,10 @@ public class VacunaRepository implements IRepository<Vacuna, Integer> {
                     v.setId(rs.getInt("id")); v.setIdMascota(rs.getInt("id_mascota"));
                     v.setNombreVacuna(rs.getString("nombre_vacuna")); v.setLote(rs.getString("lote"));
                     v.setFechaAplicacion(rs.getDate("fecha_aplicacion").toLocalDate());
-                    if (rs.getDate("fecha_proxima") != null) v.setFechaProxima(rs.getDate("fecha_proxima").toLocalDate());
+                    if (rs.getDate("fecha_proxima") != null) {
+                        v.setFechaProxima(rs.getDate("fecha_proxima").toLocalDate());
+                    }
+                    v.setIdVeterinario(rs.getInt("id_veterinario"));
                     lista.add(v);
                 }
             }
