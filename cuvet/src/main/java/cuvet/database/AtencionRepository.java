@@ -56,7 +56,9 @@ public class AtencionRepository implements IRepository<Atencion, Integer> {
         String sql = "SELECT * FROM atenciones ORDER BY fecha DESC";
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) lista.add(mapear(rs));
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
         } catch (SQLException e) {
             throw new DatabaseException("Error al listar atenciones", e);
         }

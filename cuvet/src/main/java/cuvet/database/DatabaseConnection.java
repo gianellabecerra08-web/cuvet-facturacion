@@ -44,7 +44,10 @@ public class DatabaseConnection {
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                connection = DriverManager.getConnection(URL, USER, PASS);
+                synchronized (DatabaseConnection.class){
+                    if (connection == null || connection.isClosed()) {
+                        connection = DriverManager.getConnection(URL, USER, PASS);
+                    }
             }
         } catch (SQLException e) {
             throw new DatabaseException("Error al verificar conexión", e);

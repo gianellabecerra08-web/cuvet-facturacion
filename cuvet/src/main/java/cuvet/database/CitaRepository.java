@@ -25,10 +25,64 @@ public class CitaRepository implements IRepository<Cita, Integer> {
         } catch (SQLException e) { throw new DatabaseException("Error al guardar cita", e); }
     }
 
-    @Override public Optional<Cita> buscarPorId(Integer id) { return Optional.empty(); }
-    @Override public List<Cita> listarTodos() { return new ArrayList<>(); }
-    @Override public void actualizar(Cita c) { actualizarEstado(c.getId(), c.getEstado()); }
-    @Override public void eliminar(Integer id) { actualizarEstado(id, Cita.EstadoCita.CANCELADA); }
+    @Override
+    public Optional<Cita> buscarPorId(Integer id) {
+        String sql = "SELECT * FROM citas WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapearCita(rs)); // Asegúrate de tener un método mapearCita similar al de Atenciones
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al buscar cita por ID", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Cita> listarTodos() {
+        List<Cita> lista = new ArrayList<>();
+        String sql = "SELECT * FROM citas ORDER BY fecha_hora DESC";
+        try (Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                lista.add(mapearCita(rs));
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al listar todas las citas", e);
+        }
+        return lista;
+    }
+
+    @Override
+    public void actualizar(Cita c) {
+        String sql = "UPDATE citas SET id_cliente=?, id_mascota=?, id_veterinario=?, fecha_hora=?, motivo=?, estado=? WHERE id=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, c.getIdCliente());
+            ps.setInt(2, c.getIdMascota());
+            ps.setInt(3, c.getIdVeterinario());
+            ps.setTimestamp(4, Timestamp.valueOf(c.getFechaHora()));
+            ps.setString(5, c.getMotivo());
+            ps.setString(6, c.getEstado().name());
+            ps.setInt(7, c.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al actualizar la cita", e);
+        }
+    }
+
+    @Override
+    public void eliminar(Integer id) {
+        String sql = "DELETE FROM citas WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al eliminar la cita de la base de datos", e);
+        }
+    }
 
     public void actualizarEstado(int id, Cita.EstadoCita estado) {
         try (PreparedStatement ps = conn.prepareStatement("UPDATE citas SET estado=? WHERE id=?")) {
