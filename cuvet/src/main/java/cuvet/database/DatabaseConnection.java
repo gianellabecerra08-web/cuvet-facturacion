@@ -6,9 +6,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/cuvet_db?useSSL=false&serverTimezone=America/Lima&characterEncoding=UTF-8";
+    private static final String URL = "jdbc:mysql://localhost:3306/cuvet?useSSL=false&serverTimezone=America/Lima&characterEncoding=UTF-8";
     private static final String USER = "root";
-    private static final String PASS = "cuvet2026";
+    private static final String PASS = "";
     private static volatile DatabaseConnection instancia;
     private Connection connection;
     private DatabaseConnection() {
