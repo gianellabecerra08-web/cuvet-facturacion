@@ -24,7 +24,7 @@ public class ServicioController {
     public Servicio registrar(Servicio s) { servicioRepo.guardar(s); return s; }
 
     public Servicio buscarPorId(int id) {
-        return servicioRepo.buscarPorId(id).orElseThrow(() -> new ServicioNotFoundException(id));
+        return servicioRepo.buscarPorId(id).orElseThrow(() -> new ServicioNotFoundException(String.valueOf(id)));
     }
 
     public List<Servicio> listarActivos() { return servicioRepo.listarTodos(); }

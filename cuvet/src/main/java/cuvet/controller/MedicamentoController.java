@@ -24,7 +24,7 @@ public class MedicamentoController {
         Medicamento m = medicamentoRepo.buscarPorId(idMedicamento)
                 .orElseThrow(() -> new RuntimeException("Medicamento no encontrado: " + idMedicamento));
         if (cantidad > m.getStockActual())
-            throw new StockInsuficienteException(m.getNombre(), m.getStockActual(), cantidad);
+            throw new StockInsuficienteException("Stock insuficiente para el medicamento: " + m.getNombre());
         m.descontarStock(cantidad);
         medicamentoRepo.actualizarStock(idMedicamento, m.getStockActual());
     }

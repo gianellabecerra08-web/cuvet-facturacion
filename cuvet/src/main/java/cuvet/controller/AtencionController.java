@@ -49,7 +49,7 @@ public class AtencionController {
         // Paso 1: Cargar servicios
         List<Servicio> servicios = idsServicios.stream()
                 .map(id -> servicioRepo.buscarPorId(id)
-                        .orElseThrow(() -> new ServicioNotFoundException(id)))
+                        .orElseThrow(() -> new ServicioNotFoundException(String.valueOf(id))))
                 .toList();
 
         // Paso 2: Validar duplicados (RF03)

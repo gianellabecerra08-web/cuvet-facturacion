@@ -55,7 +55,7 @@ public class FacturaController {
 
     public Factura buscarPorId(int id) {
         return facturaRepo.buscarPorId(id)
-                .orElseThrow(() -> new FacturaNotFoundException(id));
+                .orElseThrow(() -> new FacturaNotFoundException(String.valueOf(id)));
     }
 
     public List<Factura> listarPorMes(int mes, int anio) {

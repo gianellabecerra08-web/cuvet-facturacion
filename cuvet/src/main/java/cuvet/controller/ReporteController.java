@@ -25,7 +25,7 @@ public class ReporteController {
      */
     public Reporte generarReporteMensual(int mes, int anio) {
         List<Factura> facturas = facturaRepo.listarPorMes(mes, anio);
-        if (facturas.isEmpty()) throw new ReporteVacioException(mes, anio);
+        if (facturas.isEmpty()) throw new ReporteVacioException("No hay facturas para el período: " + mes + "/" + anio);
 
         Reporte reporte = new Reporte(mes, anio);
         reporte.setTotalTransacciones(facturas.size());
