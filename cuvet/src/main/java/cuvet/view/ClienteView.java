@@ -3,7 +3,6 @@ package cuvet.view;
 import cuvet.controller.ClienteController;
 import cuvet.model.Cliente;
 import cuvet.util.NotificacionService;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;

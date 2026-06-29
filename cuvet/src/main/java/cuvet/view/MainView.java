@@ -105,6 +105,7 @@ public class MainView extends JFrame {
         panelContenido.removeAll();
         switch (modulo) {
             case "clientes"     -> panelContenido.add(new ClienteView(), BorderLayout.CENTER);
+            case "mascotas"     -> panelContenido.add(new MascotaView(), BorderLayout.CENTER);
             case "atenciones"   -> panelContenido.add(new AtencionView(), BorderLayout.CENTER);
             case "facturas"     -> panelContenido.add(new FacturaView(), BorderLayout.CENTER);
             case "reportes"     -> panelContenido.add(new ReporteView(), BorderLayout.CENTER);

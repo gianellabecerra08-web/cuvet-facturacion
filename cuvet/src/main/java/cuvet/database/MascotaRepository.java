@@ -134,14 +134,16 @@ public class MascotaRepository implements IRepository<Mascota, Integer> {
         return 0;
     }
     private Mascota mapear(ResultSet rs) throws SQLException {
-        return new Mascota(
-                rs.getInt("id"),
-                rs.getString("nombre"),
-                rs.getString("especie"),
-                rs.getString("raza"),
-                rs.getInt("edad_meses"),
-                rs.getString("sexo"),
-                rs.getInt("id_cliente")
-        );
+        Mascota m = new Mascota();
+
+        m.setId(rs.getInt("id"));
+        m.setNombre(rs.getString("nombre"));
+        m.setEspecie(rs.getString("especie"));
+        m.setRaza(rs.getString("raza"));
+        m.setEdadMeses(rs.getInt("edad_meses"));
+        m.setSexo(rs.getString("sexo"));
+        m.setIdCliente(rs.getInt("id_cliente"));
+
+        return m;
     }
 }

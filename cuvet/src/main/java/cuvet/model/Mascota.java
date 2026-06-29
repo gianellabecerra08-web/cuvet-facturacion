@@ -15,13 +15,12 @@ public class Mascota {
 
     public Mascota() {}
 
-    public Mascota(int id, String nombre, String especie, String raza, int edadMeses, String sexo, int idCliente) {
+    public Mascota(int id, String nombre, String especie, String raza, int edadMeses, int idCliente) {
         this.id = id;
         this.nombre = nombre;
         this.especie = especie;
         this.raza = raza;
         this.edadMeses = edadMeses;
-        this.sexo = sexo;
         this.idCliente = idCliente;
     }
 
